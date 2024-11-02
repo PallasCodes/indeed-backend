@@ -7,6 +7,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm'
 
+import { UserRoles } from '../types/roles.type'
+
 @Entity('users')
 export class User {
   @ApiProperty({
@@ -17,20 +19,28 @@ export class User {
   id: string
 
   @ApiProperty()
-  @Column('text')
-  username: string
+  @Column('varchar')
+  name: string
 
   @ApiProperty()
-  @Column('text', { unique: true })
+  @Column('varchar')
+  lastName: string
+
+  @ApiProperty()
+  @Column('varchar', { unique: true })
   email: string
 
   @ApiProperty()
-  @Column('text', { select: false })
+  @Column('varchar', { select: false })
   password: string
 
   @ApiProperty()
-  @Column('text', { array: true, default: ['user'] })
-  roles: string[]
+  @Column('varchar')
+  role: UserRoles
+
+  @ApiProperty()
+  @Column('varchar', { nullable: true })
+  location?: string
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
