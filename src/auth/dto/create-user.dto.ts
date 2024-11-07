@@ -11,30 +11,11 @@ import {
 import { UserRoles } from '../types/roles.type'
 
 export class CreateUserDto {
-  @ApiProperty({
-    nullable: false,
-    minLength: 4,
-    maxLength: 20,
-  })
-  @IsString()
-  @MinLength(4)
-  @MaxLength(20)
-  name: string
-
-  @ApiProperty()
-  @IsString()
-  lastName: string
-
   @ApiProperty()
   @IsEnum(UserRoles)
   @IsString()
   role: UserRoles
   // ver la forma de omitir admin
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  location?: string
 
   @ApiProperty({
     nullable: false,

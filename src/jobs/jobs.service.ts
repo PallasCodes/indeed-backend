@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { CreateJobDto } from './dto/create-job.dto'
 import { UpdateJobDto } from './dto/update-job.dto'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -18,13 +18,32 @@ export class JobsService {
       return job
     } catch (err) {
       console.log(err)
-      return 'there was an error'
+      return new Error('there was en error')
     }
   }
 
-  async findAll() {
-    const jobs = await this.jobRepository.find()
-    return jobs
+  async findAll(page: number = 1, limit: number = 10, filters?: any) {
+    console.log(filters)
+    const query = await this.jobRepository.createQueryBuilder('job')
+
+    if (filters?.location && filters.location !== '') {
+      query.andWhere('job.location iLIKE :location', {
+        location: `%${filters.location}%`,
+      })
+    }
+
+    if (filters?.title && filters.title !== '') {
+      query.andWhere('job.title iLIKE :title', {
+        title: `%${filters.title}%`,
+      })
+    }
+
+    const [result, total] = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount()
+
+    return { jobs: result, total, page, lastPage: Math.ceil(total / limit) }
   }
 
   findOne(id: number) {

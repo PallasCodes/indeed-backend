@@ -19,12 +19,12 @@ export class User {
   id: string
 
   @ApiProperty()
-  @Column('varchar')
-  name: string
+  @Column('varchar', { nullable: true })
+  name?: string
 
   @ApiProperty()
-  @Column('varchar')
-  lastName: string
+  @Column('varchar', { nullable: true })
+  lastName?: string
 
   @ApiProperty()
   @Column('varchar', { unique: true })

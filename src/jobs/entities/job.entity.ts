@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+
 import { JobType } from '../types/JobType.type'
 import { JobModality } from '../types/JobModality.type'
+import { Employer } from 'src/profiles/entitites/employer.entity'
 
 @Entity('jobs')
 export class Job {
@@ -12,7 +14,14 @@ export class Job {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  // idEmployer
+  // TODO: check when to user a bi-directional onetoone and when not
+
+  @ApiProperty({
+    example: 'cd533345-f1f3-48c9-a62e-7dc2da50c8f8',
+    uniqueItems: true,
+  })
+  @OneToOne(() => Employer, (employer) => employer.id, { onDelete: 'CASCADE' })
+  employerId: string
 
   @ApiProperty()
   @Column('varchar')
