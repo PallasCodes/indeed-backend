@@ -13,6 +13,8 @@ import * as bcrypt from 'bcrypt'
 import { User } from './entities/user.entity'
 import { CreateUserDto, LoginUserDto } from './dto'
 import { JwtPayload } from './interfaces/jwt-payload.interface'
+import { CheckEmailRegisteredDto } from './dto/check-email-registered.dto'
+import { CustomResponse, Message } from 'src/utils/CustomResponse'
 
 @Injectable()
 export class AuthService {
@@ -64,5 +66,13 @@ export class AuthService {
 
     console.log(error)
     throw new InternalServerErrorException('Check server logs')
+  }
+
+  async checkEmailRegistered(dto: CheckEmailRegisteredDto) {
+    const emailIsRegistered = await this.userRepository.exist({
+      where: { email: dto.email },
+    })
+
+    return new CustomResponse(new Message(), { emailIsRegistered })
   }
 }
