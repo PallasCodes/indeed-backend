@@ -42,6 +42,10 @@ export class User {
   @Column('varchar', { nullable: true })
   location?: string
 
+  @ApiProperty({ default: false })
+  @Column('boolean', { default: false })
+  profileCompleted: boolean
+
   @BeforeInsert()
   checkFieldsBeforeInsert() {
     this.email = this.email.toLocaleLowerCase().trim()

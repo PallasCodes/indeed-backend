@@ -34,7 +34,9 @@ export class AuthService {
       await this.userRepository.save(user)
 
       delete user.password
-      return { ...user, token: this.getJwtToken({ id: user.id }) }
+      const token = this.getJwtToken({ id: user.id })
+
+      return new CustomResponse({ user: { ...user, token } })
     } catch (error) {
       this.handleDBErrors(error)
     }
@@ -53,7 +55,9 @@ export class AuthService {
     if (!bcrypt.compareSync(password, user.password))
       throw new UnauthorizedException('Credenciales no válidas')
 
-    return { ...user, token: this.getJwtToken({ id: user.id }) }
+    const token = this.getJwtToken({ id: user.id })
+
+    return new CustomResponse({ user: { ...user, token } })
   }
 
   private getJwtToken(payload: JwtPayload) {
@@ -73,6 +77,6 @@ export class AuthService {
       where: { email: dto.email },
     })
 
-    return new CustomResponse(new Message(), { emailIsRegistered })
+    return new CustomResponse({ emailIsRegistered })
   }
 }
