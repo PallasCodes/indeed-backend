@@ -4,6 +4,7 @@ import { UpdateJobDto } from './dto/update-job.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Job } from './entities/job.entity'
 import { Repository } from 'typeorm'
+import { CustomResponse } from 'src/utils/CustomResponse'
 
 @Injectable()
 export class JobsService {
@@ -12,18 +13,13 @@ export class JobsService {
   ) {}
 
   async create(createJobDto: CreateJobDto) {
-    try {
-      const job = this.jobRepository.create(createJobDto)
-      await this.jobRepository.save(job)
-      return job
-    } catch (err) {
-      console.log(err)
-      return new Error('there was en error')
-    }
+    const job = this.jobRepository.create(createJobDto)
+    await this.jobRepository.save(job)
+
+    return new CustomResponse(job)
   }
 
   async findAll(page: number = 1, limit: number = 10, filters?: any) {
-    console.log(filters)
     const query = await this.jobRepository.createQueryBuilder('job')
 
     if (filters?.location && filters.location !== '') {
@@ -39,15 +35,33 @@ export class JobsService {
     }
 
     const [result, total] = await query
+      .select([
+        'job.id',
+        'job.title',
+        'job.salaryMin',
+        'job.salaryMax',
+        'job.jobType',
+        'job.location',
+        'job.jobModality',
+        'job.description',
+        'CAST(job.description AS varchar(100)), substring(job.description for 100)',
+      ])
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount()
 
-    return { jobs: result, total, page, lastPage: Math.ceil(total / limit) }
+    return new CustomResponse({
+      jobs: result,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    })
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} job`
+  async findOne(id: string) {
+    const job = await this.jobRepository.findOneByOrFail({ id })
+
+    return new CustomResponse({ job })
   }
 
   update(id: number, updateJobDto: UpdateJobDto) {
