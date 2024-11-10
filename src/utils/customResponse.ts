@@ -6,29 +6,26 @@ enum MessageType {
 
 export class Message {
   message?: string
-  error?: boolean
   show?: MessageType
 
-  constructor(
-    message: string = 'ok',
-    error: boolean = false,
-    show: MessageType = MessageType.NONE,
-  ) {
-    this.error = error
+  constructor(message: string = 'ok', show: MessageType = MessageType.NONE) {
     this.show = show
     this.message = message
   }
 }
 
 export class CustomResponse {
-  message: Message;
+  message: Message
+  error: boolean;
   [key: string]: any // Index signature
 
   constructor(
-    message: Message = new Message(),
     additionalFields?: { [key: string]: any },
+    message: Message = new Message(),
+    error: boolean = false,
   ) {
     this.message = message
+    this.error = error
 
     if (additionalFields) {
       Object.keys(additionalFields).forEach((key) => {
