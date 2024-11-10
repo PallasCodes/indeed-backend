@@ -33,7 +33,17 @@ export class ProfilesService {
         })
         await manager.save(user)
 
-        const profile = manager.create(JobSeeker, {
+        let classRef
+
+        if (user.role === UserRoles.JOB_SEEKER) {
+          classRef = JobSeeker
+        } else if (user.role === UserRoles.EMPLOYER) {
+          classRef = Employer
+        } else {
+          throw new BadRequestException('Invalid role')
+        }
+
+        const profile = manager.create(classRef, {
           user,
         })
         return await manager.save(profile)
