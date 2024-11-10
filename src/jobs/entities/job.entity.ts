@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm'
 
 import { JobType } from '../types/JobType.type'
 import { JobModality } from '../types/JobModality.type'
@@ -20,8 +27,10 @@ export class Job {
     example: 'cd533345-f1f3-48c9-a62e-7dc2da50c8f8',
     uniqueItems: true,
   })
-  @OneToOne(() => Employer, (employer) => employer.id, { onDelete: 'CASCADE' })
-  employerId: string
+  @ManyToOne(() => Employer, (employer) => employer.jobs, {
+    onDelete: 'SET NULL',
+  })
+  employer: Employer
 
   @ApiProperty()
   @Column('varchar')
