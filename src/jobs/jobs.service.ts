@@ -34,32 +34,34 @@ export class JobsService {
       })
     }
 
-    const [result, total] = await query
+    const result = await query
       .select([
-        'job.id',
-        'job.title',
-        'job.salaryMin',
-        'job.salaryMax',
-        'job.jobType',
-        'job.location',
-        'job.jobModality',
-        'job.description',
-        'CAST(job.description AS varchar(100)), substring(job.description for 100)',
+        'job.id AS id',
+        'job.title AS title',
+        'job.salaryMin AS salaryMin',
+        'job.salaryMax AS salaryMax',
+        'job.jobType AS jobType',
+        'job.location AS location',
+        'job.jobModality AS jobModality',
       ])
+      .addSelect('SUBSTRING(job.description, 1, 150)', 'description')
       .skip((page - 1) * limit)
       .take(limit)
-      .getManyAndCount()
+      .getRawMany()
 
     return new CustomResponse({
       jobs: result,
-      total,
+      total: result.length,
       page,
-      lastPage: Math.ceil(total / limit),
+      lastPage: Math.ceil(result.length / limit),
     })
   }
 
   async findOne(id: string) {
-    const job = await this.jobRepository.findOneByOrFail({ id })
+    const job = await this.jobRepository.findOneOrFail({
+      where: { id },
+      relations: ['employer'],
+    })
 
     return new CustomResponse({ job })
   }

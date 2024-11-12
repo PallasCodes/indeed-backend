@@ -67,6 +67,5 @@ export class Job {
   @ApiProperty()
   @Column('date')
   appDeadline: Date
-
   // TODO: add created at and updated at fields
 }
