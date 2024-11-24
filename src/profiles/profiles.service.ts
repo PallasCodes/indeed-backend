@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, Repository } from 'typeorm'
 import * as bcrypt from 'bcrypt'
@@ -33,7 +32,17 @@ export class ProfilesService {
         })
         await manager.save(user)
 
-        const profile = manager.create(JobSeeker, {
+        let classRef
+
+        if (user.role === UserRoles.JOB_SEEKER) {
+          classRef = JobSeeker
+        } else if (user.role === UserRoles.EMPLOYER) {
+          classRef = Employer
+        } else {
+          throw new BadRequestException('Invalid role')
+        }
+
+        const profile = manager.create(classRef, {
           user,
         })
         return await manager.save(profile)
