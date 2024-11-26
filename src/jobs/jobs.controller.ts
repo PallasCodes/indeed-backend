@@ -9,18 +9,23 @@ import {
   Query,
   UsePipes,
 } from '@nestjs/common'
+
 import { JobsService } from './jobs.service'
 import { CreateJobDto } from './dto/create-job.dto'
 import { UpdateJobDto } from './dto/update-job.dto'
 import { TrimQueryPipe } from 'src/trim-query/trim-query.pipe'
+import { Auth, GetUser } from 'src/auth/decorators'
+import { ValidRoles } from 'src/auth/interfaces/valid-roles.interface'
+import { User } from 'src/auth/entities/user.entity'
 
 @Controller('jobs')
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
   @Post()
-  create(@Body() createJobDto: CreateJobDto) {
-    return this.jobsService.create(createJobDto)
+  @Auth(ValidRoles.EMPLOYER)
+  create(@Body() createJobDto: CreateJobDto, @GetUser() user: User) {
+    return this.jobsService.create(createJobDto, user)
   }
 
   @Get()

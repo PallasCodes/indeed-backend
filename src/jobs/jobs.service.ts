@@ -1,19 +1,32 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
+
 import { CreateJobDto } from './dto/create-job.dto'
 import { UpdateJobDto } from './dto/update-job.dto'
-import { InjectRepository } from '@nestjs/typeorm'
 import { Job } from './entities/job.entity'
-import { Repository } from 'typeorm'
 import { CustomResponse } from 'src/utils/CustomResponse'
+import { User } from 'src/auth/entities/user.entity'
+import { Employer } from 'src/profiles/entitites/employer.entity'
 
 @Injectable()
 export class JobsService {
   constructor(
     @InjectRepository(Job) private readonly jobRepository: Repository<Job>,
+    @InjectRepository(Employer)
+    private readonly employerRepository: Repository<Employer>,
   ) {}
 
-  async create(createJobDto: CreateJobDto) {
+  async create(createJobDto: CreateJobDto, user: User) {
+    const employer = await this.employerRepository.findOneBy({
+      user: { id: user.id },
+    })
+    if (!employer) {
+      throw new BadRequestException('Employer not found')
+    }
+
     const job = this.jobRepository.create(createJobDto)
+    job.employer = employer
     await this.jobRepository.save(job)
 
     return new CustomResponse(job)

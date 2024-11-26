@@ -1,12 +1,4 @@
-import {
-  IsUUID,
-  IsString,
-  IsOptional,
-  IsEnum,
-  IsBoolean,
-  IsNumber,
-  IsDate,
-} from 'class-validator'
+import { IsString, IsOptional, IsEnum, IsNumber, IsDate } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { JobType } from 'src/jobs/types/JobType.type'
