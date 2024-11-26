@@ -24,6 +24,9 @@ export class JobsService {
     if (!employer) {
       throw new BadRequestException('Employer not found')
     }
+    if (!user.profileCompleted) {
+      throw new BadRequestException('Finish your profile first')
+    }
 
     const job = this.jobRepository.create(createJobDto)
     job.employer = employer

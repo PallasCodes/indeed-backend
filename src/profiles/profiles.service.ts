@@ -9,15 +9,17 @@ import { JobSeeker } from './entitites/JobSeeker.entity'
 import { CustomResponse, Message } from 'src/utils/CustomResponse'
 import { UserRoles } from 'src/auth/types/roles.type'
 import { Employer } from './entitites/employer.entity'
+import { UpdateOwnProfileJobSeekerDto } from './dto/update-own-profile-job-seeker.dto'
 
 @Injectable()
 export class ProfilesService {
   constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(JobSeeker)
     private readonly jobSeekerRepository: Repository<JobSeeker>,
+
     @InjectRepository(Employer)
     private readonly employerRepository: Repository<Employer>,
+
     private readonly dataSource: DataSource,
   ) {}
 
@@ -71,5 +73,36 @@ export class ProfilesService {
     })
 
     return new CustomResponse({ profile })
+  }
+
+  async updateOwnProfileJobSeeker(
+    user: User,
+    dto: UpdateOwnProfileJobSeekerDto,
+  ) {
+    const jobSeeker = await this.jobSeekerRepository.findOneOrFail({
+      where: { user: { id: user.id } },
+      relations: ['user'],
+    })
+
+    if (!jobSeeker) {
+      throw new Error('JobSeeker not found')
+    }
+
+    const { phoneNumber, ...userUpdateData } = dto
+    const jobSeekerUpdateData = {
+      phoneNumber: phoneNumber || jobSeeker.phoneNumber || null,
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      manager.merge(JobSeeker, jobSeeker, jobSeekerUpdateData)
+
+      const user = jobSeeker.user
+      manager.merge(User, user, userUpdateData)
+
+      await manager.save(User, user)
+      await manager.save(JobSeeker, jobSeeker)
+
+      return new CustomResponse({ jobSeeker })
+    })
   }
 }
