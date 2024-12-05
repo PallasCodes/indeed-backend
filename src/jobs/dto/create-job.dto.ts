@@ -1,8 +1,8 @@
 import { IsString, IsOptional, IsEnum, IsNumber, IsDate } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { JobType } from 'src/jobs/types/JobType.type'
-import { JobModality } from 'src/jobs/types/JobModality.type'
+import { JobType } from '../types/JobType.type'
+import { JobModality } from '../types/JobModality.type'
 
 export class CreateJobDto {
   @ApiProperty({

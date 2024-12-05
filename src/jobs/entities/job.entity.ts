@@ -10,7 +10,7 @@ import {
 
 import { JobType } from '../types/JobType.type'
 import { JobModality } from '../types/JobModality.type'
-import { Employer } from 'src/profiles/entitites/employer.entity'
+import { Employer } from '../../profiles/entitites/employer.entity'
 
 @Entity('jobs')
 export class Job {

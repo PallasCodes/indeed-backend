@@ -5,9 +5,9 @@ import { Repository } from 'typeorm'
 import { CreateJobDto } from './dto/create-job.dto'
 import { UpdateJobDto } from './dto/update-job.dto'
 import { Job } from './entities/job.entity'
-import { CustomResponse } from 'src/utils/CustomResponse'
-import { User } from 'src/auth/entities/user.entity'
-import { Employer } from 'src/profiles/entitites/employer.entity'
+import { CustomResponse } from '../utils/CustomResponse'
+import { User } from '../auth/entities/user.entity'
+import { Employer } from '../profiles/entitites/employer.entity'
 
 @Injectable()
 export class JobsService {

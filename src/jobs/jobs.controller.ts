@@ -13,10 +13,10 @@ import {
 import { JobsService } from './jobs.service'
 import { CreateJobDto } from './dto/create-job.dto'
 import { UpdateJobDto } from './dto/update-job.dto'
-import { TrimQueryPipe } from 'src/trim-query/trim-query.pipe'
-import { Auth, GetUser } from 'src/auth/decorators'
-import { ValidRoles } from 'src/auth/interfaces/valid-roles.interface'
-import { User } from 'src/auth/entities/user.entity'
+import { TrimQueryPipe } from '../trim-query/trim-query.pipe'
+import { Auth, GetUser } from '../auth/decorators'
+import { ValidRoles } from '../auth/interfaces/valid-roles.interface'
+import { User } from '../auth/entities/user.entity'
 
 @Controller('jobs')
 export class JobsController {
