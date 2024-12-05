@@ -88,9 +88,13 @@ export class ProfilesService {
       throw new Error('JobSeeker not found')
     }
 
-    const { phoneNumber, ...userUpdateData } = dto
+    const { phoneNumber, ...userData } = dto
     const jobSeekerUpdateData = {
       phoneNumber: phoneNumber || jobSeeker.phoneNumber || null,
+    }
+    const userUpdateData = {
+      ...userData,
+      profileCompleted: true,
     }
 
     return this.dataSource.transaction(async (manager) => {
