@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
+import { Body, Controller, Get, Post, Put } from '@nestjs/common'
+
 import { ProfilesService } from './profiles.service'
 import { CreateUserDto } from 'src/auth/dto'
 import { Auth, GetUser } from 'src/auth/decorators'
-import { UserRoles } from 'src/auth/types/roles.type'
 import { User } from 'src/auth/entities/user.entity'
+import { UpdateOwnProfileJobSeekerDto } from './dto/update-own-profile-job-seeker.dto'
 
 @Controller('profiles')
 export class ProfilesController {
@@ -18,5 +19,14 @@ export class ProfilesController {
   @Get('my-profile')
   getOwnProfile(@GetUser() user: User) {
     return this.profilesService.getOwnProfile(user)
+  }
+
+  @Auth()
+  @Put('my-profile/job-seeker')
+  updateOwnProfile(
+    @GetUser() user: User,
+    @Body() dto: UpdateOwnProfileJobSeekerDto,
+  ) {
+    return this.profilesService.updateOwnProfileJobSeeker(user, dto)
   }
 }

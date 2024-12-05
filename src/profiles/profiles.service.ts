@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, Repository } from 'typeorm'
 import * as bcrypt from 'bcrypt'
@@ -10,15 +9,17 @@ import { JobSeeker } from './entitites/JobSeeker.entity'
 import { CustomResponse, Message } from 'src/utils/CustomResponse'
 import { UserRoles } from 'src/auth/types/roles.type'
 import { Employer } from './entitites/employer.entity'
+import { UpdateOwnProfileJobSeekerDto } from './dto/update-own-profile-job-seeker.dto'
 
 @Injectable()
 export class ProfilesService {
   constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(JobSeeker)
     private readonly jobSeekerRepository: Repository<JobSeeker>,
+
     @InjectRepository(Employer)
     private readonly employerRepository: Repository<Employer>,
+
     private readonly dataSource: DataSource,
   ) {}
 
@@ -33,7 +34,17 @@ export class ProfilesService {
         })
         await manager.save(user)
 
-        const profile = manager.create(JobSeeker, {
+        let classRef
+
+        if (user.role === UserRoles.JOB_SEEKER) {
+          classRef = JobSeeker
+        } else if (user.role === UserRoles.EMPLOYER) {
+          classRef = Employer
+        } else {
+          throw new BadRequestException('Invalid role')
+        }
+
+        const profile = manager.create(classRef, {
           user,
         })
         return await manager.save(profile)
@@ -62,5 +73,40 @@ export class ProfilesService {
     })
 
     return new CustomResponse({ profile })
+  }
+
+  async updateOwnProfileJobSeeker(
+    user: User,
+    dto: UpdateOwnProfileJobSeekerDto,
+  ) {
+    const jobSeeker = await this.jobSeekerRepository.findOneOrFail({
+      where: { user: { id: user.id } },
+      relations: ['user'],
+    })
+
+    if (!jobSeeker) {
+      throw new Error('JobSeeker not found')
+    }
+
+    const { phoneNumber, ...userData } = dto
+    const jobSeekerUpdateData = {
+      phoneNumber: phoneNumber || jobSeeker.phoneNumber || null,
+    }
+    const userUpdateData = {
+      ...userData,
+      profileCompleted: true,
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      manager.merge(JobSeeker, jobSeeker, jobSeekerUpdateData)
+
+      const user = jobSeeker.user
+      manager.merge(User, user, userUpdateData)
+
+      await manager.save(User, user)
+      await manager.save(JobSeeker, jobSeeker)
+
+      return new CustomResponse({ jobSeeker })
+    })
   }
 }

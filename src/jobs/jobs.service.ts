@@ -1,19 +1,35 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
+
 import { CreateJobDto } from './dto/create-job.dto'
 import { UpdateJobDto } from './dto/update-job.dto'
-import { InjectRepository } from '@nestjs/typeorm'
 import { Job } from './entities/job.entity'
-import { Repository } from 'typeorm'
 import { CustomResponse } from 'src/utils/CustomResponse'
+import { User } from 'src/auth/entities/user.entity'
+import { Employer } from 'src/profiles/entitites/employer.entity'
 
 @Injectable()
 export class JobsService {
   constructor(
     @InjectRepository(Job) private readonly jobRepository: Repository<Job>,
+    @InjectRepository(Employer)
+    private readonly employerRepository: Repository<Employer>,
   ) {}
 
-  async create(createJobDto: CreateJobDto) {
+  async create(createJobDto: CreateJobDto, user: User) {
+    const employer = await this.employerRepository.findOneBy({
+      user: { id: user.id },
+    })
+    if (!employer) {
+      throw new BadRequestException('Employer not found')
+    }
+    if (!user.profileCompleted) {
+      throw new BadRequestException('Finish your profile first')
+    }
+
     const job = this.jobRepository.create(createJobDto)
+    job.employer = employer
     await this.jobRepository.save(job)
 
     return new CustomResponse(job)
@@ -34,32 +50,34 @@ export class JobsService {
       })
     }
 
-    const [result, total] = await query
+    const result = await query
       .select([
-        'job.id',
-        'job.title',
-        'job.salaryMin',
-        'job.salaryMax',
-        'job.jobType',
-        'job.location',
-        'job.jobModality',
-        'job.description',
-        'CAST(job.description AS varchar(100)), substring(job.description for 100)',
+        'job.id AS id',
+        'job.title AS title',
+        'job.salaryMin AS salaryMin',
+        'job.salaryMax AS salaryMax',
+        'job.jobType AS jobType',
+        'job.location AS location',
+        'job.jobModality AS jobModality',
       ])
+      .addSelect('SUBSTRING(job.description, 1, 150)', 'description')
       .skip((page - 1) * limit)
       .take(limit)
-      .getManyAndCount()
+      .getRawMany()
 
     return new CustomResponse({
       jobs: result,
-      total,
+      total: result.length,
       page,
-      lastPage: Math.ceil(total / limit),
+      lastPage: Math.ceil(result.length / limit),
     })
   }
 
   async findOne(id: string) {
-    const job = await this.jobRepository.findOneByOrFail({ id })
+    const job = await this.jobRepository.findOneOrFail({
+      where: { id },
+      relations: ['employer'],
+    })
 
     return new CustomResponse({ job })
   }

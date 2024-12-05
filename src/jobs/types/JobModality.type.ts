@@ -1,5 +1,5 @@
 export enum JobModality {
-  HYBRID = 'hybrid',
-  REMOTE = 'remote',
-  IN_PERSON = 'inPerson',
+  HYBRID = 'Hybrid',
+  REMOTE = 'Remote (Home Office)',
+  IN_PERSON = 'In Person',
 }
