@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { ProfilesService } from './profiles.service'
 import { ProfilesController } from './profiles.controller'
-import { JobSeeker } from './entitites/JobSeeker.entity'
+import { JobSeeker } from './entitites/jobSeeker.entity'
 import { Employer } from './entitites/employer.entity'
 import { AuthModule } from 'src/auth/auth.module'
 import { ConfigModule } from '@nestjs/config'

@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt'
 
 import { CreateUserDto } from '../auth/dto'
 import { User } from '../auth/entities/user.entity'
-import { JobSeeker } from './entitites/JobSeeker.entity'
+import { JobSeeker } from './entitites/jobSeeker.entity'
 import { CustomResponse } from '../utils/customResponse'
 import { UserRoles } from '../auth/types/roles.type'
 import { Employer } from './entitites/employer.entity'
