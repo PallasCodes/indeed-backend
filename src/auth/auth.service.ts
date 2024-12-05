@@ -14,7 +14,7 @@ import { User } from './entities/user.entity'
 import { CreateUserDto, LoginUserDto } from './dto'
 import { JwtPayload } from './interfaces/jwt-payload.interface'
 import { CheckEmailRegisteredDto } from './dto/check-email-registered.dto'
-import { CustomResponse } from '../utils/CustomResponse'
+import { CustomResponse } from '../utils/customResponse'
 
 @Injectable()
 export class AuthService {
