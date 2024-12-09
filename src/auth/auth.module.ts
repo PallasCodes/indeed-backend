@@ -8,10 +8,12 @@ import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
 import { User } from './entities/user.entity'
 import { JwtStrategy } from './strategies/jwt.strategy'
+import { JobSeeker } from '../profiles/entitites/jobSeeker.entity'
+import { Employer } from '../profiles/entitites/employer.entity'
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, JobSeeker, Employer],
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([User]),

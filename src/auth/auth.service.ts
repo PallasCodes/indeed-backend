@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm'
 import { JwtService } from '@nestjs/jwt'
 
-import { Repository } from 'typeorm'
+import { DataSource, EntityManager, Repository } from 'typeorm'
 import * as bcrypt from 'bcrypt'
 
 import { User } from './entities/user.entity'
@@ -15,31 +15,48 @@ import { CreateUserDto, LoginUserDto } from './dto'
 import { JwtPayload } from './interfaces/jwt-payload.interface'
 import { CheckEmailRegisteredDto } from './dto/check-email-registered.dto'
 import { CustomResponse } from '../utils/customResponse'
+import { UserRoles } from './types/roles.type'
+import { JobSeeker } from 'src/profiles/entitites/jobSeeker.entity'
+import { Employer } from 'src/profiles/entitites/employer.entity'
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+
+    private readonly dataSource: DataSource,
   ) {}
 
-  async register(createUserDto: CreateUserDto) {
-    try {
-      const { password, ...userData } = createUserDto
+  async register(dto: CreateUserDto) {
+    const profile = await this.dataSource.transaction(
+      async (manager: EntityManager) => {
+        const { password, ...userData } = dto
 
-      const user = this.userRepository.create({
-        ...userData,
-        password: bcrypt.hashSync(password, 10),
-      })
-      await this.userRepository.save(user)
+        const user = manager.create(User, {
+          ...userData,
+          password: bcrypt.hashSync(password, 10),
+        })
+        await manager.save(user)
 
-      delete user.password
-      const token = this.getJwtToken({ id: user.id })
+        let classRef
 
-      return new CustomResponse({ user: { ...user, token } })
-    } catch (error) {
-      this.handleDBErrors(error)
-    }
+        if (user.role === UserRoles.JOB_SEEKER) {
+          classRef = JobSeeker
+        } else if (user.role === UserRoles.EMPLOYER) {
+          classRef = Employer
+        } else {
+          throw new BadRequestException('Invalid role')
+        }
+
+        const profile = manager.create(classRef, {
+          user,
+        })
+        return await manager.save(profile)
+      },
+    )
+
+    return new CustomResponse({ profile })
   }
 
   async login(loginUserDto: LoginUserDto) {

@@ -67,6 +67,8 @@ export class ProfilesService {
       repository = this.employerRepository
     }
 
+    console.log(user)
+
     const profile = await repository.findOneOrFail({
       relations: ['user'],
       where: { user: { id: user.id } },
